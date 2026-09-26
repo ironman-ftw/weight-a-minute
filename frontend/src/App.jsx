@@ -12,7 +12,7 @@ export default function App() {
   const [instruments, setInstruments] = useState([]);
   
   // Form & Search States
-  const [newApp, setNewApp] = useState({ category: 'Electronic Scale (10kg)', modelNumber: '', serialNumber: '', merchantName: 'Sharma Supermarket' });
+  const [newApp, setNewApp] = useState({ category: 'Electronic Scale (10kg)', modelNumber: '', serialNumber: '', merchantName: '' });
   const [inspectionData, setInspectionData] = useState({ actualReading: '', standardReading: '', gpsCaptured: false });
   const [searchId, setSearchId] = useState('');
   const [searchedRecord, setSearchedRecord] = useState(null);
@@ -43,7 +43,7 @@ export default function App() {
       });
       const data = await res.json();
       alert(`Application Created! Digital ID: ${data.digitalId}`);
-      setNewApp({ category: 'Electronic Scale (10kg)', modelNumber: '', serialNumber: '', merchantName: 'Sharma Supermarket' });
+      setNewApp({ category: 'Electronic Scale (10kg)', modelNumber: '', serialNumber: '', merchantName: '' });
       fetchInstruments();
     } catch (err) {
       alert("Failed to submit application");
@@ -147,6 +147,17 @@ export default function App() {
                   <FileText className="text-blue-400" size={18}/> New Instrument
                 </h3>
                 <form onSubmit={handleApply} className="space-y-4">
+                <div>
+                 <label className="text-xs text-slate-400 block mb-1"> Merchant Name </label>
+
+                 <input
+                  type="text"
+                  placeholder="e.g. Sharma Supermarket"
+                  value={newApp.merchantName}
+                  onChange={e => setNewApp({...newApp, merchantName: e.target.value})}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm" required
+                  />
+                </div>
                   <div>
                     <label className="text-xs text-slate-400 block mb-1">Category</label>
                     <select 

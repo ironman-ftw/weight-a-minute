@@ -1,14 +1,18 @@
 const express = require('express');
 const router = express.Router();
 
+const Instrument = require('../models/Instrument');
+const VerificationRecord = require('../models/VerificationRecord');
+
 // Temporary in-memory storage
 // No MongoDB required for the prototype
 let instruments = [];
 let verificationRecords = [];
 
 // 1. Get all instruments
-router.get('/instruments', (req, res) => {
+router.get('/instruments', async (req, res) => {
   try {
+    const instruments = await Instrument.find();
     res.json(instruments);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -16,7 +20,7 @@ router.get('/instruments', (req, res) => {
 });
 
 // 2. Register a new instrument
-router.post('/instruments/register', (req, res) => {
+router.post('/instruments/register', async (req, res) => {
   try {
     const {
       merchantName,
@@ -33,20 +37,14 @@ router.post('/instruments/register', (req, res) => {
 
     const digitalId = `DI-2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
-    const newInstrument = {
-      _id: Date.now().toString(),
+    const newInstrument = await Instrument.create({
       digitalId,
       merchantName: merchantName || 'Sharma Supermarket',
       category,
       modelNumber,
       serialNumber,
-      verificationStatus: 'Pending Application',
-      lastVerificationDate: null,
-      expiryDate: null,
-      createdAt: new Date()
-    };
-
-    instruments.unshift(newInstrument);
+      verificationStatus: 'Pending Application'
+    });
 
     res.status(201).json(newInstrument);
 
@@ -56,7 +54,7 @@ router.post('/instruments/register', (req, res) => {
 });
 
 // 3. Submit LMO Inspection Results
-router.post('/verification/submit', (req, res) => {
+router.post('/verification/submit', async (req, res) => {
   try {
     const {
       digitalId,
@@ -67,9 +65,9 @@ router.post('/verification/submit', (req, res) => {
       lng
     } = req.body;
 
-    const instrument = instruments.find(
-      item => item.digitalId === digitalId
-    );
+    const instrument = await Instrument.findOne({
+      digitalId: digitalId
+    });
 
     if (!instrument) {
       return res.status(404).json({
@@ -78,11 +76,11 @@ router.post('/verification/submit', (req, res) => {
     }
 
     const today = new Date();
+
     const expiry = new Date();
     expiry.setFullYear(today.getFullYear() + 1);
 
-    const record = {
-      _id: Date.now().toString(),
+    const record = await VerificationRecord.create({
       instrumentId: digitalId,
       actualReading,
       standardReading,
@@ -91,10 +89,8 @@ router.post('/verification/submit', (req, res) => {
         lat,
         lng
       },
-      date: today
-    };
-
-    verificationRecords.unshift(record);
+      timestamp: today
+    });
 
     instrument.verificationStatus = passStatus
       ? 'Verified'
@@ -106,9 +102,12 @@ router.post('/verification/submit', (req, res) => {
       ? expiry
       : null;
 
+    await instrument.save();
+
     res.json({
       message: 'Inspection recorded',
-      instrument: instrument
+      instrument: instrument,
+      verificationRecord: record
     });
 
   } catch (err) {
@@ -117,11 +116,11 @@ router.post('/verification/submit', (req, res) => {
 });
 
 // 4. Public QR Code Verification
-router.get('/public/verify/:digitalId', (req, res) => {
+router.get('/public/verify/:digitalId', async (req, res) => {
   try {
-    const instrument = instruments.find(
-      item => item.digitalId === req.params.digitalId
-    );
+    const instrument = await Instrument.findOne({
+      digitalId: req.params.digitalId
+    });
 
     if (!instrument) {
       return res.status(404).json({

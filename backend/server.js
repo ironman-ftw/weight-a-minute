@@ -1,8 +1,19 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const cron = require('node-cron');
+const mongoose = require('mongoose');
 
 const app = express();
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('✅ MongoDB connected successfully');
+  })
+  .catch((error) => {
+    console.error('❌ MongoDB connection failed:', error.message);
+  });
 
 // Middleware
 app.use(cors());
