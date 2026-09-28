@@ -4,6 +4,13 @@ const router = express.Router();
 const Instrument = require('../models/Instrument');
 const VerificationRecord = require('../models/VerificationRecord');
 
+const inspectors = [
+  'Inspector R. Verma',
+  'Inspector A. Sharma',
+  'Inspector P. Singh',
+  'Inspector N. Khan'
+];
+
 // Temporary in-memory storage
 // No MongoDB required for the prototype
 let instruments = [];
@@ -17,6 +24,11 @@ router.get('/instruments', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Get available inspectors
+router.get('/inspectors', (req, res) => {
+  res.json(inspectors);
 });
 
 // 2. Register a new instrument
@@ -37,19 +49,66 @@ router.post('/instruments/register', async (req, res) => {
 
     const digitalId = `DI-2026-${Math.floor(10000 + Math.random() * 90000)}`;
 
+    const randomInspector =
+     inspectors[Math.floor(Math.random() * inspectors.length)];
+
     const newInstrument = await Instrument.create({
-      digitalId,
-      merchantName: merchantName || 'Sharma Supermarket',
-      category,
-      modelNumber,
-      serialNumber,
-      verificationStatus: 'Pending Application'
+     digitalId,
+     merchantName: merchantName || '',
+     category,
+     modelNumber,
+     serialNumber,
+     verificationStatus: 'Pending Application',
+     assignedLMO: randomInspector
     });
 
     res.status(201).json(newInstrument);
 
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Assign an inspector to an instrument
+router.put('/instruments/:digitalId/assign', async (req, res) => {
+  try {
+    const { assignedLMO } = req.body;
+
+    if (!assignedLMO) {
+      return res.status(400).json({
+        error: 'Inspector name is required'
+      });
+    }
+
+    if (!inspectors.includes(assignedLMO)) {
+      return res.status(400).json({
+        error: 'Invalid inspector'
+      });
+    }
+
+    const instrument = await Instrument.findOne({
+      digitalId: req.params.digitalId
+    });
+
+    if (!instrument) {
+      return res.status(404).json({
+        error: 'Instrument not found'
+      });
+    }
+
+    instrument.assignedLMO = assignedLMO;
+
+    await instrument.save();
+
+    res.json({
+      message: 'Inspector assigned successfully',
+      instrument
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      error: err.message
+    });
   }
 });
 

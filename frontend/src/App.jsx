@@ -10,6 +10,7 @@ const API_BASE = "http://localhost:5000/api";
 export default function App() {
   const [activeRole, setActiveRole] = useState('merchant');
   const [instruments, setInstruments] = useState([]);
+  const [selectedInspectors, setSelectedInspectors] = useState({});
   
   // Form & Search States
   const [newApp, setNewApp] = useState({ category: 'Electronic Scale (10kg)', modelNumber: '', serialNumber: '', merchantName: '' });
@@ -216,6 +217,7 @@ export default function App() {
                         </div>
                         <h4 className="font-semibold text-slate-200 text-sm mt-1">{inst.category}</h4>
                         <p className="text-xs text-slate-400">Serial: {inst.serialNumber} | Model: {inst.modelNumber}</p>
+                        <p className="text-xs text-slate-400 mt-2"> Assigned Inspector: {inst.assignedLMO || 'Not Assigned'} </p>
                       </div>
                     </div>
                   ))}
@@ -236,6 +238,20 @@ export default function App() {
                       <span className="font-mono text-xs text-indigo-400 font-bold">{inst.digitalId}</span>
                       <h4 className="font-bold text-white">{inst.category}</h4>
                       <p className="text-xs text-slate-400">Merchant: {inst.merchantName}</p>
+                      <div className="mt-2">
+                       <p className="text-xs text-slate-400">Assigned Inspectors:</p>
+
+                       <div className="flex flex-wrap gap-2 mt-1">
+                        {(inst.assignedLMOs || []).map((inspector, index) => (
+                         <span
+                          key={index}
+                          className="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded"
+                         >
+                          {inspector}
+                         </span>
+                        ))}
+                      </div>
+                     </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">

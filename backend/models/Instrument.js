@@ -11,7 +11,7 @@ const instrumentSchema = new mongoose.Schema({
     enum: ['Pending Application', 'Verified', 'Rejected', 'Expired'], 
     default: 'Pending Application' 
   },
-  assignedLMO: { type: String, default: 'Inspector R. Verma' },
+  assignedLMO: { type: String, default: null },
   lastVerificationDate: { type: Date },
   expiryDate: { type: Date }
 });
