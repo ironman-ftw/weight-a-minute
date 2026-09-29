@@ -5,13 +5,24 @@ import {
   MapPin, Camera, Smartphone, Search, Users, Layers, Activity
 } from 'lucide-react';
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function App() {
   const [activeRole, setActiveRole] = useState('merchant');
   const [instruments, setInstruments] = useState([]);
   const [selectedInspectors, setSelectedInspectors] = useState({});
+  const [instrumentImage, setInstrumentImage] = useState(null);
   
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const verifyId = params.get('verify');
+
+  if (verifyId) {
+    setSearchId(verifyId);
+    setActiveRole('public');
+  }
+}, []);
+
   // Form & Search States
   const [newApp, setNewApp] = useState({ category: 'Electronic Scale (10kg)', modelNumber: '', serialNumber: '', merchantName: '' });
   const [inspectionData, setInspectionData] = useState({ actualReading: '', standardReading: '', gpsCaptured: false });
@@ -110,6 +121,7 @@ export default function App() {
             >
               <Users size={14}/> Merchant Portal
             </button>
+
             <button 
               onClick={() => setActiveRole('lmo')} 
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeRole === 'lmo' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
@@ -193,6 +205,18 @@ export default function App() {
                       required
                     />
                   </div>
+                  <div>
+                   <label className="block text-xs text-slate-400 mb-2">
+                    Instrument Image
+                   </label>
+
+                   <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setInstrumentImage(e.target.files[0])}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-300"
+                   />
+                  </div>
                   <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg text-sm">
                     Submit & Pay Fee
                   </button>
@@ -217,6 +241,27 @@ export default function App() {
                         </div>
                         <h4 className="font-semibold text-slate-200 text-sm mt-1">{inst.category}</h4>
                         <p className="text-xs text-slate-400">Serial: {inst.serialNumber} | Model: {inst.modelNumber}</p>
+                        {inst.verificationStatus === 'Verified' && (
+                         <div className="mt-3 flex items-center gap-3">
+
+                          <div className="bg-white p-2 rounded-lg">
+                           <QRCodeSVG
+                            value={`${window.location.origin}/?verify=${inst.digitalId}`}
+                            size={80}
+                          />
+                        </div>
+
+                         <div>
+                          <p className="text-xs font-semibold text-emerald-400">
+                           QR Verification
+                          </p>
+
+                          <p className="text-[11px] text-slate-400">
+                           Verified Instrument Details
+                          </p>
+                         </div>
+                      </div>
+                    )}
                         <p className="text-xs text-slate-400 mt-2"> Assigned Inspector: {inst.assignedLMO || 'Not Assigned'} </p>
                       </div>
                     </div>
@@ -304,7 +349,7 @@ export default function App() {
                   Verify
                 </button>
               </div>
-
+              {/* QR CODE */}
               {searchedRecord && searchedRecord !== 'NOT_FOUND' && (
                 <div className="bg-slate-900 p-5 rounded-xl border border-slate-700 space-y-3">
                   <div className="flex justify-between items-center">
@@ -316,6 +361,25 @@ export default function App() {
                   <p className="text-sm"><strong>Merchant:</strong> {searchedRecord.merchantName}</p>
                   <p className="text-sm"><strong>Category:</strong> {searchedRecord.category}</p>
                   <p className="text-sm"><strong>Expires On:</strong> {searchedRecord.expiryDate ? new Date(searchedRecord.expiryDate).toLocaleDateString() : 'N/A'}</p>
+                  {searchedRecord.verificationStatus === 'Verified' && (
+                   
+                   <div className="mt-5 flex flex-col items-center">
+                    <p className="text-sm font-semibold text-white mb-3">
+                     Instrument QR Code
+                    </p>
+                    <div className="bg-white p-3 rounded-lg">
+                     <QRCodeSVG
+                      value={`${window.location.origin}/verify/${searchedRecord.digitalId}`}
+                      size={160}
+                     />
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2 text-center">
+                     Verfied Instrument Details 
+                    </p>
+                   </div>
+                  )}
+
+
                 </div>
               )}
 
