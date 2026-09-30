@@ -11,7 +11,7 @@ export default function PublicSearch({
     e.preventDefault();
 
     if (!searchId.trim()) {
-      alert('Please enter a Digital ID.');
+      alert('Please enter a 	INSTRUMENT ID.');
       return;
     }
 
@@ -36,7 +36,7 @@ export default function PublicSearch({
           </h2>
 
           <p className="mt-2 text-[16px] text-[#666]">
-            Enter the Digital ID printed on the verification certificate.
+            Enter the Instrument ID printed on the verification certificate.
           </p>
 
           <form
@@ -47,7 +47,7 @@ export default function PublicSearch({
               type="text"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
-              placeholder="Enter Digital ID — e.g. DI-2026-59319"
+              placeholder="Enter Instrument ID — e.g. DI-2026-59319"
               className="h-[56px] flex-1 border border-[#d9c7a7] bg-white px-5 text-[17px] text-[#171717] outline-none placeholder:text-[#888] focus:border-[#861f2b]"
             />
 
@@ -78,7 +78,7 @@ export default function PublicSearch({
             </h3>
 
             <p className="mt-2 text-[15px] text-[#666]">
-              No verification record was found for the Digital ID entered.
+              No verification record was found for the Instrument ID entered.
             </p>
           </section>
         )}
@@ -121,7 +121,7 @@ function CertificateCard({ record }) {
       <div className="grid grid-cols-1 gap-x-10 gap-y-6 p-7 md:grid-cols-2">
 
         <Detail
-          label="Certificate / Digital ID"
+          label="Instrument ID"
           value={record.digitalId || '—'}
         />
 

@@ -120,7 +120,7 @@ export default function MerchantPortal({
                   </th>
 
                   <th className="px-6 py-4 text-left text-[15px] font-semibold uppercase tracking-wide text-[#666]">
-                    CERTIFICATE NO.
+                    	INSTRUMENT ID
                   </th>
 
                   <th className="px-6 py-4 text-left text-[15px] font-semibold uppercase tracking-wide text-[#666]">
