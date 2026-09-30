@@ -8,3 +8,9 @@ body {
   color: #f8fafc;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
+/* Desktop display scaling */
+@media (min-width: 1024px) {
+  #root {
+    zoom: 0.75;
+  }
+}
